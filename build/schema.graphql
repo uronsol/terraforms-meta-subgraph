@@ -1,0 +1,45 @@
+type Daydreaming @entity {
+  id: ID!
+  tokenId: BigInt! # uint256
+}
+
+type Terraformed @entity {
+  id: ID!
+  tokenId: BigInt! # uint256
+  terraformer: Bytes! # address
+}
+
+type TokensRevealed @entity {
+  id: ID!
+  timestamp: BigInt! # uint256
+  seed: BigInt! # uint256
+}
+
+type SupplementalData @entity {
+  id: ID!
+  tokenID: BigInt!
+  level: BigInt!
+  xCoordinate: BigInt!
+  yCoordinate: BigInt!
+  elevation: BigInt!
+  structureSpaceX: BigInt!
+  structureSpaceY: BigInt!
+  structureSpaceZ: BigInt!
+  zoneName: String!
+  zoneColors: [String!]!
+  characterSet: [String!]!
+}
+
+type Token @entity {
+  id: ID!
+  tokenID: BigInt!
+  tokenURI: String!
+  supplementalData: SupplementalData
+  terraformer: Terraformer!
+  createdAt: BigInt!
+}
+
+type Terraformer @entity {
+  id: ID!
+  tokens: [Token!]! @derivedFrom(field: "terraformer")
+}
