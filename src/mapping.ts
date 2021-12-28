@@ -5,37 +5,17 @@ import {
   OwnershipTransferred as OwnershipTransferredEvent,
   Terraformed as TerraformedEvent,
   TokensRevealed as TokensRevealedEvent,
-  Transfer as TransferEvent
+  Transfer as TransferEvent,
+  Terraforms
 } from "../generated/Terraforms/Terraforms"
 import {
-  Approval,
-  ApprovalForAll,
   Daydreaming,
-  OwnershipTransferred,
   Terraformed,
   TokensRevealed,
-  Transfer
+  SupplementalData,
+  Token,
+  Terraformer
 } from "../generated/schema"
-
-export function handleApproval(event: ApprovalEvent): void {
-  let entity = new Approval(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.owner = event.params.owner
-  entity.approved = event.params.approved
-  entity.tokenId = event.params.tokenId
-  entity.save()
-}
-
-export function handleApprovalForAll(event: ApprovalForAllEvent): void {
-  let entity = new ApprovalForAll(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.owner = event.params.owner
-  entity.operator = event.params.operator
-  entity.approved = event.params.approved
-  entity.save()
-}
 
 export function handleDaydreaming(event: DaydreamingEvent): void {
   let entity = new Daydreaming(
@@ -45,16 +25,6 @@ export function handleDaydreaming(event: DaydreamingEvent): void {
   entity.save()
 }
 
-export function handleOwnershipTransferred(
-  event: OwnershipTransferredEvent
-): void {
-  let entity = new OwnershipTransferred(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.previousOwner = event.params.previousOwner
-  entity.newOwner = event.params.newOwner
-  entity.save()
-}
 
 export function handleTerraformed(event: TerraformedEvent): void {
   let entity = new Terraformed(
@@ -75,11 +45,44 @@ export function handleTokensRevealed(event: TokensRevealedEvent): void {
 }
 
 export function handleTransfer(event: TransferEvent): void {
-  let entity = new Transfer(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.from = event.params.from
-  entity.to = event.params.to
-  entity.tokenId = event.params.tokenId
-  entity.save()
+  let contract = Terraforms.bind(event.address)
+  let token = Token.load(event.params.tokenId.toString())
+  if (!token) {
+    token = new Token(event.params.tokenId.toString())
+    token.creator = event.params.to.toHexString()
+    token.tokenID = event.params.tokenId
+    token.createdAt = event.block.timestamp
+    token.tokenURI = contract.tokenURI(event.params.tokenId)
+  }
+
+  token.supplementalData = event.params.tokenId.toString()
+  token.terraformer = event.params.to.toHexString()
+  token.save()
+
+  let terraformer = Terraformer.load(event.params.to.toHexString())
+  if (!terraformer) {
+    terraformer = new Terraformer(event.params.to.toHexString())
+    terraformer.save()
+  }
+
+  let supplementalData = SupplementalData.load(event.params.tokenId.toString())
+  if (!supplementalData) {
+    const supplementalRes = contract.try_tokenSupplementalData(event.params.tokenId)
+    if (supplementalRes.reverted) {
+      return
+    }
+    const supplemental = supplementalRes.value
+    supplementalData = new SupplementalData(event.params.tokenId.toString())
+    supplementalData.level = supplemental.level
+    supplementalData.xCoordinate = supplemental.xCoordinate
+    supplementalData.yCoordinate = supplemental.yCoordinate
+    supplementalData.elevation = supplemental.elevation
+    supplementalData.structureSpaceX = supplemental.structureSpaceX
+    supplementalData.structureSpaceY = supplemental.structureSpaceY
+    supplementalData.structureSpaceZ = supplemental.structureSpaceZ
+    supplementalData.zoneName = supplemental.zoneName
+    supplementalData.zoneColors = supplemental.zoneColors
+    supplementalData.characterSet = supplemental.characterSet
+    supplementalData.save()
+  }
 }

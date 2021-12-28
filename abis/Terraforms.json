@@ -528,17 +528,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
-    ],
-    "name": "tokenCharacters",
-    "outputs": [
-      { "internalType": "string[32][32]", "name": "", "type": "string[32][32]" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "tokenCounter",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -552,21 +541,6 @@
     "name": "tokenHTML",
     "outputs": [
       { "internalType": "string", "name": "result", "type": "string" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
-    ],
-    "name": "tokenHeightmapIndices",
-    "outputs": [
-      {
-        "internalType": "uint256[32][32]",
-        "name": "",
-        "type": "uint256[32][32]"
-      }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -642,17 +616,6 @@
         "name": "result",
         "type": "tuple"
       }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
-    ],
-    "name": "tokenTerrainValues",
-    "outputs": [
-      { "internalType": "int256[32][32]", "name": "", "type": "int256[32][32]" }
     ],
     "stateMutability": "view",
     "type": "function"

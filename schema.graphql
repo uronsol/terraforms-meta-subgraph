@@ -1,26 +1,6 @@
-type Approval @entity {
-  id: ID!
-  owner: Bytes! # address
-  approved: Bytes! # address
-  tokenId: BigInt! # uint256
-}
-
-type ApprovalForAll @entity {
-  id: ID!
-  owner: Bytes! # address
-  operator: Bytes! # address
-  approved: Boolean! # bool
-}
-
 type Daydreaming @entity {
   id: ID!
   tokenId: BigInt! # uint256
-}
-
-type OwnershipTransferred @entity {
-  id: ID!
-  previousOwner: Bytes! # address
-  newOwner: Bytes! # address
 }
 
 type Terraformed @entity {
@@ -35,9 +15,31 @@ type TokensRevealed @entity {
   seed: BigInt! # uint256
 }
 
-type Transfer @entity {
+type SupplementalData @entity {
   id: ID!
-  from: Bytes! # address
-  to: Bytes! # address
-  tokenId: BigInt! # uint256
+  tokenID: BigInt!
+  level: BigInt!
+  xCoordinate: BigInt!
+  yCoordinate: BigInt!
+  elevation: BigInt!
+  structureSpaceX: BigInt!
+  structureSpaceY: BigInt!
+  structureSpaceZ: BigInt!
+  zoneName: String!
+  zoneColors: [String!]!
+  characterSet: [String!]!
+}
+
+type Token @entity {
+  id: ID!
+  tokenID: BigInt!
+  tokenURI: String!
+  supplementalData: SupplementalData
+  terraformer: Terraformer!
+  createdAt: BigInt!
+}
+
+type Terraformer @entity {
+  id: ID!
+  tokens: [Token!]! @derivedFrom(field: "terraformer")
 }
