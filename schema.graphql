@@ -17,7 +17,7 @@ type TokensRevealed @entity {
 
 type SupplementalData @entity {
   id: ID!
-  tokenID: BigInt!
+  tokenID: ID!
   level: BigInt!
   xCoordinate: BigInt!
   yCoordinate: BigInt!
@@ -34,9 +34,9 @@ type Token @entity {
   id: ID!
   tokenID: BigInt!
   tokenURI: String!
-  supplementalData: SupplementalData
   terraformer: Terraformer!
   createdAt: BigInt!
+  supplementalData: SupplementalData
 }
 
 type Terraformer @entity {

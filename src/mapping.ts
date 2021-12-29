@@ -1,8 +1,5 @@
 import {
-  Approval as ApprovalEvent,
-  ApprovalForAll as ApprovalForAllEvent,
   Daydreaming as DaydreamingEvent,
-  OwnershipTransferred as OwnershipTransferredEvent,
   Terraformed as TerraformedEvent,
   TokensRevealed as TokensRevealedEvent,
   Transfer as TransferEvent,
@@ -16,6 +13,7 @@ import {
   Token,
   Terraformer
 } from "../generated/schema"
+import { BigInt } from "@graphprotocol/graph-ts"
 
 export function handleDaydreaming(event: DaydreamingEvent): void {
   let entity = new Daydreaming(
@@ -42,6 +40,42 @@ export function handleTokensRevealed(event: TokensRevealedEvent): void {
   entity.timestamp = event.params.timestamp
   entity.seed = event.params.seed
   entity.save()
+
+  let contract = Terraforms.bind(event.address)
+  const totalSupply = parseInt(contract.totalSupply().toString())
+  for (let i = 0; i + 1 < totalSupply; i++) {
+    const contractToken = contract.tokenByIndex(BigInt.fromString(`${i}`))
+    let token = Token.load(contractToken.toString())
+    if (!token) {
+      token = new Token(contractToken.toString())
+      token.tokenID = contractToken
+      token.createdAt = event.block.timestamp
+      token.tokenURI = contract.tokenURI(contractToken)
+    }
+    token.supplementalData = contractToken.toString()
+
+    let supplementalData = SupplementalData.load(contractToken.toString())
+    if (!supplementalData) {
+      const supplementalRes = contract.try_tokenSupplementalData(contractToken)
+      if (supplementalRes.reverted) {
+        return
+      }
+      const supplemental = supplementalRes.value
+      supplementalData = new SupplementalData(contractToken.toString())
+      supplementalData.tokenID = contractToken.toString()
+      supplementalData.level = supplemental.level
+      supplementalData.xCoordinate = supplemental.xCoordinate
+      supplementalData.yCoordinate = supplemental.yCoordinate
+      supplementalData.elevation = supplemental.elevation
+      supplementalData.structureSpaceX = supplemental.structureSpaceX
+      supplementalData.structureSpaceY = supplemental.structureSpaceY
+      supplementalData.structureSpaceZ = supplemental.structureSpaceZ
+      supplementalData.zoneName = supplemental.zoneName
+      supplementalData.zoneColors = supplemental.zoneColors
+      supplementalData.characterSet = supplemental.characterSet
+      supplementalData.save()
+    }
+  }
 }
 
 export function handleTransfer(event: TransferEvent): void {
@@ -49,7 +83,6 @@ export function handleTransfer(event: TransferEvent): void {
   let token = Token.load(event.params.tokenId.toString())
   if (!token) {
     token = new Token(event.params.tokenId.toString())
-    token.creator = event.params.to.toHexString()
     token.tokenID = event.params.tokenId
     token.createdAt = event.block.timestamp
     token.tokenURI = contract.tokenURI(event.params.tokenId)
@@ -73,6 +106,7 @@ export function handleTransfer(event: TransferEvent): void {
     }
     const supplemental = supplementalRes.value
     supplementalData = new SupplementalData(event.params.tokenId.toString())
+    supplementalData.tokenID = event.params.tokenId.toString()
     supplementalData.level = supplemental.level
     supplementalData.xCoordinate = supplemental.xCoordinate
     supplementalData.yCoordinate = supplemental.yCoordinate

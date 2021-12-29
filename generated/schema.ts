@@ -168,6 +168,7 @@ export class SupplementalData extends Entity {
     super();
     this.set("id", Value.fromString(id));
 
+    this.set("tokenID", Value.fromString(""));
     this.set("level", Value.fromBigInt(BigInt.zero()));
     this.set("xCoordinate", Value.fromBigInt(BigInt.zero()));
     this.set("yCoordinate", Value.fromBigInt(BigInt.zero()));
@@ -206,6 +207,15 @@ export class SupplementalData extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get tokenID(): string {
+    let value = this.get("tokenID");
+    return value!.toString();
+  }
+
+  set tokenID(value: string) {
+    this.set("tokenID", Value.fromString(value));
   }
 
   get level(): BigInt {
@@ -305,10 +315,8 @@ export class Token extends Entity {
     this.set("id", Value.fromString(id));
 
     this.set("tokenID", Value.fromBigInt(BigInt.zero()));
-    this.set("supplementalData", Value.fromString(""));
     this.set("tokenURI", Value.fromString(""));
     this.set("terraformer", Value.fromString(""));
-    this.set("creator", Value.fromString(""));
     this.set("createdAt", Value.fromBigInt(BigInt.zero()));
   }
 
@@ -347,15 +355,6 @@ export class Token extends Entity {
     this.set("tokenID", Value.fromBigInt(value));
   }
 
-  get supplementalData(): string {
-    let value = this.get("supplementalData");
-    return value!.toString();
-  }
-
-  set supplementalData(value: string) {
-    this.set("supplementalData", Value.fromString(value));
-  }
-
   get tokenURI(): string {
     let value = this.get("tokenURI");
     return value!.toString();
@@ -374,15 +373,6 @@ export class Token extends Entity {
     this.set("terraformer", Value.fromString(value));
   }
 
-  get creator(): string {
-    let value = this.get("creator");
-    return value!.toString();
-  }
-
-  set creator(value: string) {
-    this.set("creator", Value.fromString(value));
-  }
-
   get createdAt(): BigInt {
     let value = this.get("createdAt");
     return value!.toBigInt();
@@ -390,6 +380,23 @@ export class Token extends Entity {
 
   set createdAt(value: BigInt) {
     this.set("createdAt", Value.fromBigInt(value));
+  }
+
+  get supplementalData(): string | null {
+    let value = this.get("supplementalData");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set supplementalData(value: string | null) {
+    if (!value) {
+      this.unset("supplementalData");
+    } else {
+      this.set("supplementalData", Value.fromString(<string>value));
+    }
   }
 }
 
@@ -432,14 +439,5 @@ export class Terraformer extends Entity {
 
   set tokens(value: Array<string>) {
     this.set("tokens", Value.fromStringArray(value));
-  }
-
-  get creator(): Array<string> {
-    let value = this.get("creator");
-    return value!.toStringArray();
-  }
-
-  set creator(value: Array<string>) {
-    this.set("creator", Value.fromStringArray(value));
   }
 }
